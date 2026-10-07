@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 
 const app = express();
@@ -8,8 +9,13 @@ const io = new Server(server, {
   cors: { origin: "*" }
 });
 
-// Servir les fichiers statiques du dossier public
-app.use(express.static('public'));
+// Indique explicitement le dossier 'public' quel que soit l'environnement d'exécution
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Redirection automatique vers index.html sur la racine '/'
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // État du match stocké côté serveur
 let gameState = {
@@ -21,12 +27,8 @@ let gameState = {
 };
 
 io.on('connection', (socket) => {
-  console.log('Un utilisateur s\'est connecté :', socket.id);
-
-  // Envoyer l'état actuel au nouvel arrivant
   socket.emit('updateState', gameState);
 
-  // Réception des actions de la télécommande
   socket.on('changeScore', (data) => {
     if (data.team === 'A') gameState.scoreA = Math.max(0, gameState.scoreA + data.delta);
     if (data.team === 'B') gameState.scoreB = Math.max(0, gameState.scoreB + data.delta);
@@ -39,19 +41,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('resetGame', () => {
-    gameState = {
-      scoreA: 0,
-      scoreB: 0,
-      teamA: "ÉQUIPE A",
-      teamB: "ÉQUIPE B",
-      period: 1
-    };
-    io.emit('updateState', gameState);
-  });
-
-  socket.on('updateNames', (names) => {
-    if (names.teamA) gameState.teamA = names.teamA;
-    if (names.teamB) gameState.teamB = names.teamB;
+    gameState = { scoreA: 0, scoreB: 0, teamA: "ÉQUIPE A", teamB: "ÉQUIPE B", period: 1 };
     io.emit('updateState', gameState);
   });
 });
