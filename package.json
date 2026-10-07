@@ -1,0 +1,13 @@
+{
+  "name": "score-basket-realtime",
+  "version": "1.0.0",
+  "description": "Affichage et télécommande de score de basket en temps réel",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.7.2"
+  }
+}
