@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Télécommande Basket</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 15px;
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      touch-action: manipulation;
+    }
+    h2 { text-align: center; margin-top: 0; font-size: 1.2rem; }
+    .teams-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .team-box {
+      background: #1e1e1e;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      border: 2px solid #333;
+    }
+    .team-a { border-color: #2196F3; }
+    .team-b { border-color: #F44336; }
+    .score-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 18px 0;
+      margin: 8px 0;
+      font-size: 1.4rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    .btn:active { opacity: 0.7; transform: scale(0.98); }
+    .btn-add { background-color: #4CAF50; }
+    .btn-sub { background-color: #757575; font-size: 1rem; padding: 10px 0; }
+    
+    .period-box {
+      margin-top: 15px;
+      background: #1e1e1e;
+      padding: 10px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .period-btns {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-reset {
+      background-color: #d32f2f;
+      margin-top: 20px;
+      font-size: 1rem;
+      padding: 12px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>TÉLÉCOMMANDE MATCH</h2>
+
+  <div class="teams-container">
+    <!-- ÉQUIPE A -->
+    <div class="team-box team-a">
+      <div class="score-title" id="lblA">ÉQUIPE A</div>
+      <button class="btn btn-add" onclick="sendScore('A', 1)">+1</button>
+      <button class="btn btn-add" onclick="sendScore('A', 2)">+2</button>
+      <button class="btn btn-add" onclick="sendScore('A', 3)">+3</button>
+      <button class="btn btn-sub" onclick="sendScore('A', -1)">-1</button>
+    </div>
+
+    <!-- ÉQUIPE B -->
+    <div class="team-box team-b">
+      <div class="score-title" id="lblB">ÉQUIPE B</div>
+      <button class="btn btn-add" onclick="sendScore('B', 1)">+1</button>
+      <button class="btn btn-add" onclick="sendScore('B', 2)">+2</button>
+      <button class="btn btn-add" onclick="sendScore('B', 3)">+3</button>
+      <button class="btn btn-sub" onclick="sendScore('B', -1)">-1</button>
+    </div>
+  </div>
+
+  <div class="period-box">
+    <div>Quart-temps : <span id="periodVal">1</span></div>
+    <div class="period-btns">
+      <button class="btn btn-sub" onclick="sendPeriod(-1)">-</button>
+      <button class="btn btn-add" onclick="sendPeriod(1)">+</button>
+    </div>
+  </div>
+
+  <button class="btn btn-reset" onclick="resetGame()">Réinitialiser le match</button>
+
+  <script>
+    const socket = io();
+
+    function vibrate() {
+      if (navigator.vibrate) navigator.vibrate(50);
+    }
+
+    function sendScore(team, delta) {
+      vibrate();
+      socket.emit('changeScore', { team, delta });
+    }
+
+    function sendPeriod(delta) {
+      vibrate();
+      socket.emit('changePeriod', delta);
+    }
+
+    function resetGame() {
+      if (confirm('Réinitialiser le score à zero ?')) {
+        vibrate();
+        socket.emit('resetGame');
+      }
+    }
+
+    socket.on('updateState', (state) => {
+      document.getElementById('lblA').textContent = state.teamA;
+      document.getElementById('lblB').textContent = state.teamB;
+      document.getElementById('periodVal').textContent = state.period;
+    });
+  </script>
+</body>
+</html>

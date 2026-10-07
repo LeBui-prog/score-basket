@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Tableau d'affichage - Basket</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #0d1117;
+      color: #ffffff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .header {
+      font-size: 2rem;
+      color: #8b949e;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .board {
+      display: flex;
+      width: 90vw;
+      justify-content: space-around;
+      align-items: center;
+      background: #161b22;
+      border: 4px solid #30363d;
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .team {
+      text-align: center;
+      flex: 1;
+    }
+    .team-name {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #58a6ff;
+      margin-bottom: 10px;
+    }
+    .team-b .team-name {
+      color: #f85149;
+    }
+    .score {
+      font-size: 10rem;
+      font-weight: 900;
+      font-family: monospace;
+      background: #010409;
+      border-radius: 15px;
+      padding: 10px 30px;
+      border: 2px solid #30363d;
+    }
+    .divider {
+      font-size: 4rem;
+      color: #484f58;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header" id="periodDisplay">QUART-TEMPS 1</div>
+
+  <div class="board">
+    <div class="team team-a">
+      <div class="team-name" id="nameA">ÉQUIPE A</div>
+      <div class="score" id="scoreA">00</div>
+    </div>
+
+    <div class="divider">:</div>
+
+    <div class="team team-b">
+      <div class="team-name" id="nameB">ÉQUIPE B</div>
+      <div class="score" id="scoreB">00</div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    socket.on('updateState', (state) => {
+      document.getElementById('scoreA').textContent = String(state.scoreA).padStart(2, '0');
+      document.getElementById('scoreB').textContent = String(state.scoreB).padStart(2, '0');
+      document.getElementById('nameA').textContent = state.teamA;
+      document.getElementById('nameB').textContent = state.teamB;
+      document.getElementById('periodDisplay').textContent = `QUART-TEMPS ${state.period}`;
+    });
+  </script>
+</body>
+</html>
